@@ -16,10 +16,13 @@ function getCountrySelectOptions(currentCountryCode: string): Country[] {
   return shuffleArray(otherCountries).slice(0, 3)
 }
 
+const totalCountries = computed(() => countries.length)
+
 export default function useCountry() {
   return {
     getCountrySelectOptions,
     getRandomCountry,
     countryCodes,
+    totalCountries,
   }
 }

@@ -1,27 +1,23 @@
 <script setup lang="ts">
-import useGame from '@/composables/useGame';
 import GameSelectCountryButton from '../buttons/GameSelectCountryButton.vue'
 import { computed } from 'vue'
-import PrimaryButton from '../buttons/PrimaryButton.vue';
-
 import instantWinAudio from '@/assets/audios/instant-win.wav'
 import failAudio from '@/assets/audios/fail.wav'
 import GameNextCountryButton from '../buttons/GameNextCountryButton.vue';
+import { storeToRefs } from 'pinia';
+import { gameStore } from '@/stores/gameStore';
+import GameScoreBar from './GameScoreBar.vue';
 
-const {
-  roundDataset,
-  guessRoundCountry,
-  currentRoundCountry,
-  loadNextCountry,
-} = useGame()
+const { gameState } = storeToRefs(gameStore())
+const { attemptGuessCountry, loadNextCountry, getCurrentCountry } = gameStore()
 
 const defineSelectButtonVariant = computed(() => {
   return (countryCode: string) => {
-    if (countryCode == roundDataset.selectedCountryCode && currentRoundCountry.value.code != countryCode) {
+    if (countryCode == gameState.value.selectedCountryCode && getCurrentCountry().code != countryCode) {
       return 'incorrect'
     }
     
-    if (roundDataset.selectedCountryCode && countryCode == currentRoundCountry.value.code) {
+    if (gameState.value.selectedCountryCode && countryCode == getCurrentCountry().code) {
       return 'correct'
     }
 
@@ -30,15 +26,17 @@ const defineSelectButtonVariant = computed(() => {
 })
 
 function handleGuessCountry(countryCode: string) {
-  if (roundDataset.selectedCountryCode) return
+  if (gameState.value.selectedCountryCode) return
   
-  const { isCorrect } = guessRoundCountry(countryCode)
+  const { isCorrect } = attemptGuessCountry(countryCode)
 
   if (isCorrect) {
     const audio = new Audio(instantWinAudio)
+    audio.volume = 0.15
     audio.play()
   } else {
     const audio = new Audio(failAudio)
+    audio.volume = 0.15
     audio.play()
   }
 }
@@ -47,20 +45,18 @@ function handleGuessCountry(countryCode: string) {
 
 <template>
   <div class="flex flex-col gap-6">
-    <div>
-      {{ roundDataset.countriesPlayed }} / {{ roundDataset.countriesLimit }}
-    </div>
+    <GameScoreBar />
     
     <div class="max-w-[400px] w-full self-center">
       <div
         class="fib w-full !bg-cover aspect-[4/3]"
-        :class="`fi-${roundDataset.currentCountry?.code}`"
+        :class="`fi-${gameState.currentCountry?.code}`"
       ></div>
     </div>
 
     <div class="flex flex-col gap-2">
       <GameSelectCountryButton
-        v-for="option in roundDataset.countrySelectOptions"
+        v-for="option in gameState.countrySelectOptions"
         :key="option.country.code"
         :option-key="option.key"
         :variant="defineSelectButtonVariant(option.country.code)"
@@ -69,7 +65,7 @@ function handleGuessCountry(countryCode: string) {
     </div>
 
     <GameNextCountryButton
-      v-if="roundDataset.selectedCountryCode"
+      v-if="gameState.selectedCountryCode"
       @click="() => loadNextCountry()"
     >Próximo</GameNextCountryButton>
   </div>

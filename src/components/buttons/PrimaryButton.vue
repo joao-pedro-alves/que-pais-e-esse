@@ -20,6 +20,7 @@ const props = withDefaults(defineProps<{
 <style scoped>
 .button {
   @apply
+    w-full
     py-2
     flex-1
     bg-gray-800

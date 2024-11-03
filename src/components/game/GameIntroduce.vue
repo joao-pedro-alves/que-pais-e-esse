@@ -1,14 +1,29 @@
 <script setup lang="ts">
+import { gameStore } from '@/stores/gameStore';
 import PrimaryButton from '../buttons/PrimaryButton.vue'
-import useGame from '@/composables/useGame'
+import { storeToRefs } from 'pinia';
 
-const {
-  startGame,
-  getFlagsCountValues,
-  setSettingsFlagsCount,
-  settings,
-} = useGame()
+// import QuePaisEEsseAudio from '@/assets/audios/que-pais-e-esse.mp3'
+import { onMounted, onUnmounted } from 'vue';
 
+const { gameState } = storeToRefs(gameStore())
+const { starRound, countryCountOptions } = gameStore()
+
+// const introduceAudio = new Audio(QuePaisEEsseAudio)
+// introduceAudio.volume = 0.05
+// introduceAudio.loop = true
+
+// function playIntroduceAudio() {
+//   introduceAudio.play().catch(() => {
+//     window.addEventListener('click', () => introduceAudio.play(), { once: true })
+//   })
+// }
+
+// introduceAudio.addEventListener('canplaythrough', playIntroduceAudio, { once: true })
+
+onUnmounted(() => {
+    // setTimeout(() => introduceAudio.pause())
+})
 </script>
 
 <template>
@@ -29,10 +44,10 @@ const {
       <div class="font-semibold mb-2">Número de bandeiras</div>
       <div class="flex items-center justify-between gap-2">
         <PrimaryButton
-          v-for="i in getFlagsCountValues()"
+          v-for="i in countryCountOptions"
           :key="i"
-          :active="settings.flagsCount == i"
-          @click="() => setSettingsFlagsCount(i)"
+          :active="gameState.totalCountries == i"
+          @click="() => gameState.totalCountries = i"
         >{{ i }}</PrimaryButton>
       </div>
     </section>
@@ -41,7 +56,7 @@ const {
       <PrimaryButton
         class="w-full !py-4 !rounded-full"
         :active="true"
-        @click="() => startGame()"
+        @click="() => starRound()"
       >Bora jogar!</PrimaryButton>
     </section>
   </div>
